@@ -1,0 +1,111 @@
+import numpy as np
+import pandas as pd
+import yfinance as yf
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+ASSET = 'AAPL'
+
+MARKET_INDEX = '^GSPC'
+
+START_DATE = '2015-01-01'
+END_DATE = '2025-01-01'
+
+# Market interest rate
+RISK_FREE_RATE = 0.02
+MONTHLY_RISK_FREE_RATE = RISK_FREE_RATE / 12
+
+def download_info(asset, start_date, end_date):
+    info = {}
+    ticker = yf.download(asset, start_date, end_date, auto_adjust=False)
+    info['Price'] = ticker['Adj Close']
+    return pd.concat(info, axis=1)
+
+def calculate_asset_returns(asset_info):
+    asset_info['Price'] = np.log(asset_info['Price'] / asset_info['Price'].shift(1))
+    return asset_info[1:]
+
+def show(asset_info):
+    plt.hist(asset_info, bins = 1500)
+    asset_variance = asset_info.var()
+    asset_mean = asset_info.mean()
+    sigma = np.sqrt(asset_variance)
+    x = np.linspace(asset_mean - 3 * sigma, asset_mean + 3 * sigma, 100)
+    plt.xlabel('Log Returns')
+    plt.ylabel('Probability Density')
+    plt.title('Checking Normality of Asset Returns')
+    plt.plot(x, norm.pdf(x, asset_mean, sigma))
+    plt.show()
+
+
+class CAPM:
+
+    def __init__(self, assets, start_date, end_date):
+        self.data = None
+        self.assets = assets
+        self.start_date = start_date
+        self.end_date = end_date
+
+    def download_data(self):
+        data = {}
+
+        for asset in self.assets:
+            ticker = yf.download(asset, self.start_date, self.end_date, auto_adjust=False)
+            data[asset] = ticker['Adj Close']
+        return pd.concat(data, axis=1)
+
+    def initialize(self):
+
+        asset_data = self.download_data()
+        asset_data = asset_data.resample('BME').last()
+        print(asset_data.head())
+
+        if isinstance(asset_data.columns, pd.MultiIndex):
+            asset_data.columns = asset_data.columns.droplevel(0)
+
+        self.data = pd.DataFrame(
+            {'asset_adjclose': asset_data[self.assets[0]], 'market_adjclose': asset_data[self.assets[1]]})
+
+        self.data[['asset_returns', 'market_returns']] = np.log(self.data[['asset_adjclose', 'market_adjclose']] /
+                                                                self.data[['asset_adjclose', 'market_adjclose']].shift(1))
+
+        self.data = self.data[1:]
+        print(self.data)
+
+    def calculate_beta(self):
+        covariance_matrix = np.cov(self.data['asset_returns'], self.data['market_returns'])
+        beta = covariance_matrix[0, 1] / covariance_matrix[1, 1]
+        print("Beta calculated through formula:", beta)
+
+    def regression(self):
+        beta, alpha = np.polyfit(self.data['market_returns'], self.data['asset_returns'], deg=1)
+        print("Beta calculated through regression:", beta)
+        print("Alpha:", alpha)
+        expected_monthly_return = MONTHLY_RISK_FREE_RATE + beta * (self.data['market_returns'].mean() - MONTHLY_RISK_FREE_RATE)
+        expected_annual_return = expected_monthly_return * 12
+        print("Expected Annual Return of Asset:", expected_annual_return)
+        self.plot_regression(alpha, beta)
+
+    def plot_regression(self, alpha, beta):
+        excess_market = self.data["market_returns"] - MONTHLY_RISK_FREE_RATE
+        excess_asset = self.data["asset_returns"] - MONTHLY_RISK_FREE_RATE
+        fig, axis = plt.subplots(1, figsize = (20,10))
+        axis.scatter(excess_market, excess_asset, label = "Excess Return Data Points", alpha = 0.6)
+        capm_line = beta * excess_market + alpha
+        axis.plot(excess_market, capm_line, color = 'red', label = "CAPM Regression Line")
+        plt.title('Capital Asset Pricing Model (CAPM) - Finding Alphas and Betas')
+        plt.xlabel('Market Return $R_m$', fontsize = 18)
+        plt.ylabel('Asset Return $R_a$')
+        plt.text(0.05, 0.01,rf'$R_a - R_f = {beta:.2f} (R_m - R_f) + {alpha * 100:.2f}\%$', fontsize=14, bbox=dict(facecolor='white', alpha=0.5))
+        plt.grid(True)
+        plt.show()
+
+if __name__ == '__main__':
+
+    asset_info = download_info(ASSET, START_DATE, END_DATE)
+    show(calculate_asset_returns(asset_info))
+
+    capm = CAPM([ASSET, MARKET_INDEX], START_DATE, END_DATE)
+    capm.initialize()
+    capm.calculate_beta()
+    capm.regression()
