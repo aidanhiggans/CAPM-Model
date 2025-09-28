@@ -54,7 +54,7 @@ E[Rₐ] = Rf + β × (E[Rₘ] - Rf) + α
 ### Understanding Beta and Alpha
 - **β = 1.0** → The portfolio moves in line with the market.  
 - **β > 1.0** → The portfolio is more volatile than the market (higher risk, higher potential reward).  
-- **β < 1.0** → The portfolio is less sensitive to market movements (less risk).  
+- **β < 1.0** → The portfolio is less sensitive to market movements.  
 
 **Alpha** represents the return above or below what CAPM would predict:  
 - **α > 0** → The portfolio has outperformed its risk-adjusted expectations.  
