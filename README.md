@@ -13,11 +13,11 @@ A key feature of this implementation is its **flexibility**: the user can easily
 ## Key Features
 
 ### Flexible Portfolio Construction
-The program supports both **single-asset analysis** and **multi-asset portfolios**.  
+The model supports both **single-asset** and **multi-asset portfolio analysis**.  
 - To analyze one stock, the weights can simply be set to `[1]`.  
-- For multi-asset portfolios, any combination of tickers can be chosen, with weights specified in a corresponding list.  
+- For multi-asset portfolios, any combination of tickers can be chosen, with weights specified in a corresponding ordered list.  
 - Weight validation ensures that the portfolio is always properly normalized (summing to 1).  
-- The benchmark index (default: S&P 500, `^GSPC`) can also be swapped for another market proxy, allowing for different comparative baselines.
+- The benchmark index (default: S&P 500, `^GSPC`) can also be swapped for another market index, allowing for different comparative baselines.
 
 ### Risk and Performance Metrics
 The tool calculates a comprehensive set of metrics:
@@ -30,12 +30,8 @@ The tool calculates a comprehensive set of metrics:
 ### Dual Beta Estimation
 Beta can be computed in two independent ways:
 1. Using the covariance-variance formula:  
-   \[
-   \beta = \frac{\text{Cov}(R_p, R_m)}{\text{Var}(R_m)}
-   \]  
+β = Cov(Rₐ, Rₘ) / Var(Rₘ)
 2. Via linear regression of excess returns against the market, which also yields an estimate of **alpha**.
-
-This redundancy ensures that results are both theoretically grounded and empirically tested.
 
 ### Visual Analysis
 The model produces a **CAPM regression plot**, showing excess portfolio returns against excess market returns. The regression line represents the Security Market Line (SML), and the vertical intercept highlights alpha. This visualization helps determine whether the portfolio has historically underperformed, matched, or outperformed CAPM expectations.
@@ -47,49 +43,43 @@ The model produces a **CAPM regression plot**, showing excess portfolio returns 
 ### The CAPM Framework
 The foundation of the analysis is the CAPM equation:
 
-\[
-E[R_a] = R_f + \beta \times (E[R_m] - R_f) + \alpha
-\]
+E[Rₐ] = Rf + β × (E[Rₘ] - Rf) + α
 
-- **\(E[R_a]\)**: The expected return of the asset or portfolio  
-- **\(R_f\)**: The risk-free rate (such as U.S. Treasury yields)  
-- **\(\beta\)**: The sensitivity of the portfolio to market risk  
-- **\(E[R_m]\)**: The expected return of the market  
-- **\(\alpha\)**: The abnormal return not explained by market risk  
+- **E[Rₐ]**: The expected return of the asset or portfolio  
+- **Rf**: The risk-free rate (such as U.S. Treasury yields)  
+- **β**: The sensitivity of the portfolio to market risk  
+- **E[Rₘ]**: The expected return of the market  
+- **α**: The abnormal return not explained by market risk  
 
 ### Understanding Beta and Alpha
-- **Beta = 1.0** → The portfolio moves in line with the market.  
-- **Beta > 1.0** → The portfolio is more volatile than the market (higher risk, higher potential reward).  
-- **Beta < 1.0** → The portfolio is less sensitive to market swings (lower risk).  
+- **β = 1.0** → The portfolio moves in line with the market.  
+- **β > 1.0** → The portfolio is more volatile than the market (higher risk, higher potential reward).  
+- **β < 1.0** → The portfolio is less sensitive to market movements (less risk).  
 
 **Alpha** represents the return above or below what CAPM would predict:  
-- **Alpha > 0** → The portfolio has outperformed its risk-adjusted expectations.  
-- **Alpha = 0** → The portfolio’s returns are fully explained by market risk.  
-- **Alpha < 0** → The portfolio has underperformed relative to its risk profile.  
+- **α > 0** → The portfolio has outperformed its risk-adjusted expectations.  
+- **α = 0** → The portfolio’s returns are fully explained by market risk.  
+- **α < 0** → The portfolio has underperformed relative to its risk profile.  
 
 This distinction is crucial in active management, as a consistently positive alpha indicates skill or market inefficiency.
 
 ### Statistical Implementation
 1. **Data Collection**: Adjusted closing prices are downloaded via Yahoo Finance.  
 2. **Resampling**: Prices are resampled to month-end values to smooth daily volatility and align with CAPM’s assumption of approximately normal returns.  
-3. **Return Calculation**: Logarithmic monthly returns are calculated as  
-   \[
-   r_t = \ln\left(\frac{P_t}{P_{t-1}}\right)
-   \]  
-4. **Portfolio Aggregation**: Weighted returns are computed based on user-specified allocations.  
-5. **Excess Returns**: Returns are adjusted for the monthly risk-free rate.  
-6. **Regression**: A linear regression estimates beta (slope) and alpha (intercept).  
+3. **Return Calculation**: Logarithmic monthly returns are calculated as
+   ln(Pₜ/Pₜ₋₁) 
+5. **Portfolio Aggregation**: Weighted returns are computed based on user-specified allocations.  
+6. **Excess Returns**: Returns are adjusted for the monthly risk-free rate.  
+7. **Regression**: A linear regression estimates beta (slope) and alpha (intercept).  
 
 ---
 
-## Technology Stack
+## Libraries Used
 
 - **NumPy**: Numerical and statistical computations  
 - **Pandas**: Time series and portfolio data handling  
 - **yFinance**: Market data collection from Yahoo Finance  
 - **Matplotlib**: Visualization of regression lines and distributions  
-
-The implementation is fully object-oriented, with robust error handling for weight validation, missing data, and column alignment.  
 
 ---
 
@@ -99,4 +89,4 @@ The implementation is fully object-oriented, with robust error handling for weig
 2. Run the script.  
 3. Review the printed metrics and regression plots to interpret portfolio performance.  
 
-This modular approach allows for straightforward experimentation with different portfolios, benchmarks, and time periods.
+This approach allows for straightforward experimentation with different portfolios, benchmarks, and time periods.
