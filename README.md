@@ -2,99 +2,101 @@
 
 ## Project Overview
 
-A comprehensive Python implementation of the Capital Asset Pricing Model (CAPM) designed for financial portfolio analysis. This tool enables quantitative analysts, portfolio managers, and researchers to evaluate asset performance, calculate systematic risk metrics, and understand the relationship between portfolio returns and broad market movements.
+This project provides a Python-based implementation of the **Capital Asset Pricing Model (CAPM)** for analyzing financial portfolios. It is designed to evaluate the performance of individual securities or portfolios of assets in relation to the overall market.  
 
-## Features
+By combining historical market data with modern portfolio theory, the tool estimates expected returns, measures systematic risk exposure, and highlights whether a portfolio has delivered returns beyond what would be predicted by its risk profile.
 
-### Single Asset and Portfolio Analysis
-- Support for individual stock analysis by configuring portfolio weights as [1] for single assets
-- Multi-asset portfolio evaluation with flexible weighting schemes for baskets of securities
-- Customizable portfolio construction with weight validation ensuring all allocations sum to 1.0
-- Automated handling of both individual equity tickers and complex portfolio combinations
+A key feature of this implementation is its **flexibility**: the user can easily configure assets, portfolio weights, and benchmark indices directly from the script’s input variables. This makes it suitable both for single-stock analysis and for more complex portfolio structures.
 
-### Comprehensive Risk and Return Metrics
-- Beta coefficient calculation measuring portfolio sensitivity to market movements
-- Alpha detection identifying abnormal returns not explained by market risk exposure
-- Sharpe ratio computation for risk-adjusted performance measurement
-- Annualized volatility calculation using square root of time rule
-- Realized return metrics capturing historical performance with proper compounding
+---
 
-### Advanced Analytical Capabilities
-- Dual methodology for beta estimation using covariance-variance formula and linear regression
-- Excess returns analysis implementing proper CAPM framework with risk-free rate adjustments
-- Expected returns forecasting based on CAPM equilibrium model
-- Visual regression analysis plotting security market line with historical data points
+## Key Features
 
-### Robust Data Processing Pipeline
-- Automated financial data download from Yahoo Finance API
-- Monthly returns calculation using logarithmic returns
-- Portfolio aggregation combining multiple asset returns according to weights
-- Data validation handling missing values and multi-index data structures
+### Flexible Portfolio Construction
+The program supports both **single-asset analysis** and **multi-asset portfolios**.  
+- To analyze one stock, the weights can simply be set to `[1]`.  
+- For multi-asset portfolios, any combination of tickers can be chosen, with weights specified in a corresponding list.  
+- Weight validation ensures that the portfolio is always properly normalized (summing to 1).  
+- The benchmark index (default: S&P 500, `^GSPC`) can also be swapped for another market proxy, allowing for different comparative baselines.
+
+### Risk and Performance Metrics
+The tool calculates a comprehensive set of metrics:
+- **Realized annual returns** based on historical performance  
+- **Annualized volatility**, using the square-root-of-time rule  
+- **Sharpe ratio**, which evaluates returns relative to risk  
+- **Beta**, measuring the sensitivity of the portfolio to market movements  
+- **Alpha**, representing abnormal returns not explained by market exposure  
+
+### Dual Beta Estimation
+Beta can be computed in two independent ways:
+1. Using the covariance-variance formula:  
+   \[
+   \beta = \frac{\text{Cov}(R_p, R_m)}{\text{Var}(R_m)}
+   \]  
+2. Via linear regression of excess returns against the market, which also yields an estimate of **alpha**.
+
+This redundancy ensures that results are both theoretically grounded and empirically tested.
+
+### Visual Analysis
+The model produces a **CAPM regression plot**, showing excess portfolio returns against excess market returns. The regression line represents the Security Market Line (SML), and the vertical intercept highlights alpha. This visualization helps determine whether the portfolio has historically underperformed, matched, or outperformed CAPM expectations.
+
+---
 
 ## Methodology
 
-### CAPM Theoretical Framework
-The implementation follows the standard Capital Asset Pricing Model equation:
+### The CAPM Framework
+The foundation of the analysis is the CAPM equation:
 
-E[Rₐ] = Rf + β × (E[Rₘ] - Rf) + α
+\[
+E[R_a] = R_f + \beta \times (E[R_m] - R_f) + \alpha
+\]
 
-Where:
-- E[Rₐ] = Expected portfolio return
-- Rf = Risk-free rate
-- β = Portfolio beta (systematic risk)
-- E[Rₘ] = Expected market return
-- α = Alpha (abnormal return)
+- **\(E[R_a]\)**: The expected return of the asset or portfolio  
+- **\(R_f\)**: The risk-free rate (such as U.S. Treasury yields)  
+- **\(\beta\)**: The sensitivity of the portfolio to market risk  
+- **\(E[R_m]\)**: The expected return of the market  
+- **\(\alpha\)**: The abnormal return not explained by market risk  
+
+### Understanding Beta and Alpha
+- **Beta = 1.0** → The portfolio moves in line with the market.  
+- **Beta > 1.0** → The portfolio is more volatile than the market (higher risk, higher potential reward).  
+- **Beta < 1.0** → The portfolio is less sensitive to market swings (lower risk).  
+
+**Alpha** represents the return above or below what CAPM would predict:  
+- **Alpha > 0** → The portfolio has outperformed its risk-adjusted expectations.  
+- **Alpha = 0** → The portfolio’s returns are fully explained by market risk.  
+- **Alpha < 0** → The portfolio has underperformed relative to its risk profile.  
+
+This distinction is crucial in active management, as a consistently positive alpha indicates skill or market inefficiency.
 
 ### Statistical Implementation
+1. **Data Collection**: Adjusted closing prices are downloaded via Yahoo Finance.  
+2. **Resampling**: Prices are resampled to month-end values to smooth daily volatility and align with CAPM’s assumption of approximately normal returns.  
+3. **Return Calculation**: Logarithmic monthly returns are calculated as  
+   \[
+   r_t = \ln\left(\frac{P_t}{P_{t-1}}\right)
+   \]  
+4. **Portfolio Aggregation**: Weighted returns are computed based on user-specified allocations.  
+5. **Excess Returns**: Returns are adjusted for the monthly risk-free rate.  
+6. **Regression**: A linear regression estimates beta (slope) and alpha (intercept).  
 
-#### Returns Calculation
-- Monthly logarithmic returns computed as ln(Pₜ/Pₜ₋₁)
-- Excess returns adjusted by monthly risk-free rate
-- Annualization using √12 for volatility and ×12 for returns
+---
 
-#### Beta Estimation
-- Covariance method: β = Cov(Rₐ, Rₘ) / Var(Rₘ)
-- Regression method: Linear regression of excess returns
-- Matrix operations for covariance calculations
+## Technology Stack
 
-#### Portfolio Construction
-- Weighted return aggregation: Rₚ = ∑(wᵢ × Rᵢ) where ∑wᵢ = 1
-- Multi-asset support with automatic validation
-- Missing data handling through dropna operations
+- **NumPy**: Numerical and statistical computations  
+- **Pandas**: Time series and portfolio data handling  
+- **yFinance**: Market data collection from Yahoo Finance  
+- **Matplotlib**: Visualization of regression lines and distributions  
 
-### Data Processing Architecture
-1. Data collection from Yahoo Finance
-2. Resampling to monthly frequency
-3. Logarithmic returns calculation
-4. Portfolio aggregation by weights
-5. Risk metrics and regression analysis
+The implementation is fully object-oriented, with robust error handling for weight validation, missing data, and column alignment.  
 
-## Tech Stack
+---
 
-### Core Libraries
-- **NumPy**: Mathematical operations and statistical calculations
-- **Pandas**: Data manipulation and time series analysis
-- **yFinance**: Financial data extraction
-- **Matplotlib**: Data visualization and plotting
+## Usage
 
-### Financial Methodologies
-- Time Series Analysis
-- Risk Metrics Computation
-- Regression Analysis (OLS)
-- Modern Portfolio Theory
+1. Edit the variables at the top of the script (`ASSET`, `WEIGHTS`, `MARKET_INDEX`, `START_DATE`, `END_DATE`, and `RISK_FREE_RATE`) to suit your analysis.  
+2. Run the script.  
+3. Review the printed metrics and regression plots to interpret portfolio performance.  
 
-### Technical Features
-- Object-Oriented Design
-- Error Handling and Validation
-- MultiIndex Data Handling
-- Configurable Parameters
-
-### Data Sources
-- Equity Data: Yahoo Finance adjusted closing prices
-- Market Benchmark: S&P 500 Index (^GSPC)
-- Risk-Free Rate: User-configurable (default: 2% annual)
-
-## Installation
-
-```bash
-pip install numpy pandas yfinance matplotlib scipy
+This modular approach allows for straightforward experimentation with different portfolios, benchmarks, and time periods.
