@@ -90,3 +90,35 @@ This distinction is crucial in active management, as a consistently positive alp
 3. Review the printed metrics and regression plots to interpret portfolio performance.  
 
 This approach allows for straightforward experimentation with different portfolios, benchmarks, and time periods.
+
+---
+
+## Analysis on Sample Run
+
+From a sample run, the portfolio produced the following metrics:  
+
+- **Realized Annual Return**: 21.3%  
+- **Annual Volatility**: 17.7%  
+- **Sharpe Ratio**: 1.09  
+- **Beta (Regression and Covariance)**: ≈ 0.94  
+- **Alpha**: 0.009 (≈ 0.9%)  
+- **Expected Return (CAPM)**: 10.4%  
+
+### Interpretation
+- **Beta ≈ 1**: With a beta close to 1, the portfolio behaves very similarly to the market benchmark. A beta value of 0.94 indicates slightly less sensitivity than the overall market. Hence when the market rises or falls, this portfolio tends to move in the same direction but with slightly smaller magnitude.  
+- **Alpha ≈ 0.9%**: A positive alpha suggests that the portfolio has generated returns above what would be predicted by its market risk exposure. In practical terms, this is an indication of “excess performance,” which may come from diversification benefits, security selection, or exposure to risks not captured by CAPM.  
+- **Realized vs. Expected Returns**: The realized annual return (21.3%) is significantly higher than the CAPM-expected return (10.4%). This gap illustrates a key limitation of CAPM: while it provides an equilibrium prediction under simplifying assumptions, actual realized returns are influenced by many other factors, such as industry trends, macroeconomic shocks, liquidity effects, and investor sentiment.
+
+### Assumptions and Limitations
+The CAPM model is elegant but relies on assumptions that are restrictive in practice:  
+- **Normality of returns**: CAPM assumes that asset returns are normally distributed, which justifies the use of mean and variance as sufficient risk-return descriptors. In reality, returns often exhibit skewness and fat tails (higher probability of extreme events).  
+- **Linearity**: CAPM assumes a strictly linear relationship between excess portfolio returns and excess market returns. However, empirical evidence suggests that this linearity may not hold across all time periods or asset classes. 
+- **Single-factor dependence**: CAPM explains returns solely through exposure to market risk (beta). Other systematic risk factors are ignored.  
+
+### Possible Extensions
+To overcome these limitations, CAPM can be extended into multi-factor frameworks:  
+- **Fama-French Three-Factor Model**: In the Fama-French Three-Factor Model, two additional factors are introduced beyond the market: **SMB (Small Minus Big)**, which captures the size effect (the historical outperformance of small-cap stocks over large-cap stocks), and **HML (High Minus Low)**, which captures the value effect (the tendency for high book-to-market "value" stocks to outperform low book-to-market "growth" stocks). Together, these factors account for systematic risks that CAPM alone cannot explain.
+- **Carhart Four-Factor Model**: Further includes a **momentum** factor, capturing the tendency of winning stocks to keep outperforming in the short term.  
+- **Arbitrage Pricing Theory (APT)**: Generalizes the idea further, allowing multiple macroeconomic and firm-specific factors to drive returns.  
+
+These extensions provide a richer description of asset returns and often align more closely with observed market behavior, reducing the discrepancy between realized and expected returns.
