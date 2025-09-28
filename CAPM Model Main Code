@@ -10,20 +10,17 @@ MARKET_INDEX = '^GSPC'
 START_DATE = '2015-01-01'
 END_DATE = '2025-01-01'
 
-# Market interest rate
 RISK_FREE_RATE = 0.02
 MONTHLY_RISK_FREE_RATE = RISK_FREE_RATE / 12
 
 WEIGHTS = [0.2, 0.2, 0.12, 0.2, 0.2, 0.08]
 
-# Making sure that portfolio weights are equal to 1
 if not np.isclose(sum(WEIGHTS), 1.0):
     raise ValueError("Portfolio weights must sum to 1. Current sum: {}".format(sum(WEIGHTS)))
 
 class CAPM:
 
     # Object-oriented programming is used through the definition of a class object called CAPM
-    # Parameters of the class are assets, start date, and end date
     def __init__(self, assets, start_date, end_date):
         self.data = None
         self.assets = assets
@@ -32,25 +29,16 @@ class CAPM:
 
     def download_data(self):
 
-        # Dictionary is used to store asset information as key value pairs
-        # The asset ticker is the key and the Adjusted Closing Price is the value
         data = {}
 
         for asset in self.assets:
             ticker = yf.download(asset, self.start_date, self.end_date, auto_adjust=False)
-            # Adjusted Closing Prices are used as it is more accurate since it captures factors such as dividends and stock splits
             data[asset] = ticker['Adj Close']
         return pd.concat(data, axis=1)
 
     def initialize(self):
 
-        # Asset daily returns are downloaded as a pandas dataframe
         asset_data = self.download_data()
-        # Monthly returns are to be used instead of daily returns
-        # This is because in this case we are dealing with long term investing rather than short term investing
-        # Monthly returns are approximately normally distributed
-        # Hence monthly returns are used since the CAPM model assumes that the returns are normalized
-        # The daily returns are grouped by month through the resample code, whilst last() returns the month end closing price of the asset
         asset_data = asset_data.resample('ME').last()
 
         # When downloading data, there is an issue that resulting DataFrame returns two levels of column names
@@ -64,7 +52,6 @@ class CAPM:
 
         # Calculating logarithmic monthly returns
         # To calculate logarithmic monthly returns the formula ln(s(t)/s(t-1)) is used
-        # This is captured by using shift
         market_returns = np.log(market_prices / market_prices.shift(1))
         assets_returns = np.log(asset_prices / asset_prices.shift(1))
 
@@ -73,7 +60,6 @@ class CAPM:
             raise ValueError("Number of weights must be equal to number of assets")
         portfolio_returns = (assets_returns * WEIGHTS).sum(axis=1)
 
-        # Storing the data
         self.data = pd.DataFrame({'portfolio_returns': portfolio_returns, 'market_returns': market_returns}).dropna()
         print(self.data.head())
 
@@ -82,24 +68,17 @@ class CAPM:
         variance_asset = self.data['portfolio_returns'].var()
         std_dev_asset = np.sqrt(variance_asset)
 
-        # Annualizing the metrics
         annual_asset_return = mean_asset_returns * 12
         annual_asset_volatility = std_dev_asset * np.sqrt(12)
 
         # Calculating Sharpe Ratio as Annual Return - Risk Free Rate / Volatility
         sharpe_ratio = ((annual_asset_return - RISK_FREE_RATE) / annual_asset_volatility)
 
-        # Printing the metrics
         print("Realized Annual Asset Returns:", annual_asset_return)
         print("Annual Asset Volatility:", annual_asset_volatility)
         print("Sharpe Ratio:", sharpe_ratio)
 
     def calculate_beta(self):
-        # Beta is the variable that is defined as how risky the asset/portfolio is relative to the market
-        # Beta = 1 then asset moves exactly with the market
-        # Beta > 1 then asset risk relative to market is higher than that of an average asset
-        # Beta < 1 then asset risk relative to market is less than that of an average asset
-        # Beta formula is as follows: Beta = Covariance(Return of Asset, Return of Market) / Variance(Market)
         # In the covariance matrix, the values along the main diagonal are the variances (covariance of the values with themselves is the same as the variance)
         # Values not in the main diagonal are the covariances
         # The covariance matrix is also symmetric, so cov[0,1] = cov[1,0]
@@ -114,24 +93,11 @@ class CAPM:
         print("Beta calculated through formula:", beta)
 
     def regression(self):
-        # Linear regression will be used to fit a line to the data
-        # The formula for CAPM is as follows: E[ra] = rf + beta*(E[rm]-rf)
-        # CAPM formula will be modified slightly to also include alpha
-        # New formula is E[ra] - rf = beta*(E[rm] - rf) + alpha where alpha is the abnormal return not explained by the market
-        # In other words alpha is the value by which the actual return outperforms/underperforms the expected return (the return predicted by the CAPM Model)
-        # This formula gives the equation of a line y = mx + c
-        # In this case the plot will be expected asset_returns (minus rf) against expected market_returns (minus rf) where beta will be the gradient and alpha will be the y-intercept
-        # If alpha = 0, then the asset lies on the CAPM Line and all the return is explained by the market risk
-        # If alpha > 0, then asset lies above CAPM Line and that means that the asset has outperformed the expected return
-        # If alpha < 0, then asset lies below CAPM Line and that means that the asset has underperformed the expected return
-        # Degree is equal to 1 since a line will be plotted
         market_excess = self.data["market_returns"] - MONTHLY_RISK_FREE_RATE
         asset_excess = self.data["portfolio_returns"] - MONTHLY_RISK_FREE_RATE
         beta, alpha = np.polyfit(market_excess,asset_excess, deg=1)
         print("Beta calculated through regression:", beta)
         print("Alpha:", alpha)
-        # Expected return will be calculated using the CAPM formula
-        # We are dealing with monthly returns, so to capture annual returns we need to multiply monthly returns by 12
         expected_monthly_return = MONTHLY_RISK_FREE_RATE + beta * (self.data['market_returns'].mean() - MONTHLY_RISK_FREE_RATE)
         expected_annual_return = expected_monthly_return * 12
         print("Expected Annual Return of Asset:", expected_annual_return)
