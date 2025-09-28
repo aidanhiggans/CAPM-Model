@@ -3,7 +3,7 @@ import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
 
-ASSET = ['AAPL']
+ASSET = ['AAPL', 'WMT', 'TSLA', 'MSFT', 'UNH', 'JPM']
 
 MARKET_INDEX = '^GSPC'
 
@@ -14,7 +14,7 @@ END_DATE = '2025-01-01'
 RISK_FREE_RATE = 0.02
 MONTHLY_RISK_FREE_RATE = RISK_FREE_RATE / 12
 
-WEIGHTS = [1]
+WEIGHTS = [0.2, 0.2, 0.12, 0.2, 0.2, 0.08]
 
 # Making sure that portfolio weights are equal to 1
 if not np.isclose(sum(WEIGHTS), 1.0):
