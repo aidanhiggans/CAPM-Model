@@ -1,5 +1,24 @@
 # CAPM Portfolio Analysis
 
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Key Features](#key-features)
+  - [Flexible Portfolio Construction](#flexible-portfolio-construction)
+  - [Risk and Performance Metrics](#risk-and-performance-metrics)
+  - [Dual Beta Estimation](#dual-beta-estimation)
+  - [Visual Analysis](#visual-analysis)
+- [Methodology](#methodology)
+  - [The CAPM Framework](#the-capm-framework)
+  - [Understanding Beta and Alpha](#understanding-beta-and-alpha)
+  - [Statistical Implementation](#statistical-implementation)
+- [Libraries Used](#libraries-used)
+- [Usage](#usage)
+- [Analysis on Sample Run](#analysis-on-sample-run)
+  - [Interpretation](#interpretation)
+  - [Assumptions and Limitations](#assumptions-and-limitations)
+  - [Possible Extensions](#possible-extensions)
+
 ## Project Overview
 
 This project provides a Python-based implementation of the **Capital Asset Pricing Model (CAPM)** for analyzing financial portfolios. It is designed to evaluate the performance of individual securities or portfolios of assets in relation to the overall market.  
